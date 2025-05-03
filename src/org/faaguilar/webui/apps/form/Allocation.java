@@ -1,6 +1,7 @@
 package org.faaguilar.webui.apps.form;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -505,7 +506,7 @@ public class Allocation
 
             // Warning si writeOff > 30%
             if (isAutoWriteOff && 
-                open.signum() != 0 && (writeOff.divide(open, 2, BigDecimal.ROUND_HALF_UP).doubleValue() > 0.30))
+                open.signum() != 0 && (writeOff.divide (open, 2, RoundingMode.HALF_UP).doubleValue() > 0.30))
             {
                 msg = "AllocationWriteOffWarn";
             }
