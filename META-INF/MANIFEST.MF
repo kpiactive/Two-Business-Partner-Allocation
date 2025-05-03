@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Idempiere new allocation
+Bundle-Name: Two Business Partner Allocation
 Bundle-SymbolicName: org.faaguilar.idempiere.allocation;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 2.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.adempiere.base;bundle-version="0.0.0",
  org.adempiere.server;bundle-version="0.0.0",
