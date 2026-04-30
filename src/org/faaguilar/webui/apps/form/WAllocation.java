@@ -5,6 +5,8 @@ import static org.adempiere.webui.ClientInfo.SMALL_WIDTH;
 import static org.adempiere.webui.ClientInfo.maxWidth;
 
 import java.sql.Timestamp;
+import java.util.Enumeration;
+import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -35,6 +37,7 @@ import org.adempiere.webui.panel.IFormController;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MAllocationHdr;
+import org.compiere.model.MInvoice;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.util.DisplayType;
@@ -116,10 +119,21 @@ public class WAllocation extends Allocation
 
 	public WAllocation() {
 		try {
+			Properties ctx = Env.getCtx();
+			int C_Invoice_ID = getC_InvoiceIdFromContext(ctx);
 			super.dynInit(); 
 			dynInit();
 			zkInit();
 			calculate();
+			if (C_Invoice_ID > 0) {
+				MInvoice invoice = MInvoice.get(C_Invoice_ID);
+				bpartnerSearch.setValue(invoice.getC_BPartner_ID());
+				bpartnerSearch2.setValue(invoice.getC_BPartner_ID());
+				m_C_BPartner2_ID = invoice.getC_BPartner_ID();
+				m_C_BPartner_ID = invoice.getC_BPartner_ID();
+				loadBPartner();
+			}
+			
 		} catch(Exception e) {
 			log.log(Level.SEVERE, "", e);
 		}
@@ -323,17 +337,7 @@ public class WAllocation extends Allocation
 		ZKUpdateUtil.setVflex(allocationLayout, "min");
 		ZKUpdateUtil.setVflex(statusBar, "min");
 		ZKUpdateUtil.setVflex(south, "min");
-		Rows rows = allocationLayout.newRows();
-		Row row = rows.newRow();
-		if (maxWidth(SMALL_WIDTH-1))
-		{
-			Hbox box = new Hbox();
-			box.setWidth("100%");
-			box.setPack("end");
-			box.appendChild(differenceLabel.rightAlign());
-			box.appendChild(allocCurrencyLabel.rightAlign());
-			row.appendCellChild(box);
-		}
+		
 		
 	}
 
@@ -618,9 +622,38 @@ public class WAllocation extends Allocation
 			}
 		}
 	}
+	
+	public static int getC_InvoiceIdFromContext(Properties ctx) {
+	    // Opción A: Buscar la clave específica que termina con |C_Invoice_ID
+	    Enumeration<?> keys = ctx.propertyNames();
+	    while (keys.hasMoreElements()) {
+	        String key = (String) keys.nextElement();
+	        if (key.endsWith("|C_Invoice_ID")) {
+	            String value = ctx.getProperty(key);
+	            if (value != null && !value.isEmpty()) {
+	                return Integer.parseInt(value);
+	            }
+	        }
+	    }
+	    
+	    // Opción B: Buscar el patrón {WindowNo}|{TabNo}|C_Invoice_ID
+	    // Como el WindowNo es variable, iteramos sobre posibles valores
+	    for (int wNo = 0; wNo <= 10; wNo++) {
+	        for (int tNo = 0; tNo <= 5; tNo++) {
+	            String key = wNo + "|" + tNo + "|C_Invoice_ID";
+	            String value = ctx.getProperty(key);
+	            if (value != null && !value.isEmpty()) {
+	                return Integer.parseInt(value);
+	            }
+	        }
+	    }
+	    
+	    return -1; // No encontrado
+	}
 
 	@Override
 	public ADForm getForm() {
 		return form;
 	}
+
 }
